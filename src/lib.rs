@@ -13,6 +13,13 @@ pub mod distance {
 }
 
 pub mod speed {
+    pub fn mph_to_knots(mph: f64) -> f64 {
+        crate::distance::statute_to_nautical(mph)
+    }
+
+    pub fn knots_to_mph(knots: f64) -> f64 {
+        crate::distance::nautical_to_statute(knots)
+    }
 }
 
 
@@ -28,6 +35,26 @@ mod tests {
     #[test]
     fn sm_to_nm_disp() {
         assert_eq!(format!("{:.2}", distance::statute_to_nautical(1.0)), "0.87");
+    }
+
+    #[test]
+    fn mph_to_knots_test() {
+        assert_eq!(speed::mph_to_knots(100.0), 86.89740820734342);
+    }
+
+    #[test]
+    fn mph_to_knots_test_disp() {
+        assert_eq!(format!("{:.0}", speed::mph_to_knots(150.0)), "130");
+    }
+
+    #[test]
+    fn knots_to_mph_test() {
+        assert_eq!(speed::knots_to_mph(124.0), 142.69700622615483);
+    }
+
+    #[test]
+    fn knots_to_mph_test_disp() {
+        assert_eq!(format!("{:.0}", speed::knots_to_mph(124.0)), "143");
     }
 
     #[test]
