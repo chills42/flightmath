@@ -1,14 +1,42 @@
-
 pub mod distance {
-    pub const STATUTE_MILE: f64 = 1609.34;
-    pub const NAUTICAL_MILE: f64 = 1852.0;
+    struct StatuteMiles {
+        pub value: f64
+    }
+
+    impl StatuteMiles {
+        fn new(value: f64) -> Self {
+            StatuteMiles { value }
+        }
+    }
+
+    impl From<NauticalMiles> for StatuteMiles {
+        fn from(item: NauticalMiles) -> Self {
+            StatuteMiles::new(item.value * 1.1507823082754423)
+        }
+    }
+
+    struct NauticalMiles {
+        pub value: f64
+    }
+
+    impl NauticalMiles {
+        fn new(value: f64) -> Self {
+            NauticalMiles { value }
+        }
+    }
+
+    impl From<StatuteMiles> for NauticalMiles {
+        fn from(item: StatuteMiles) -> Self {
+            NauticalMiles::new(item.value * 0.8689740820734341)
+        }
+    }
 
     pub fn statute_to_nautical(stat_dist: f64) -> f64 {
-        stat_dist * STATUTE_MILE / NAUTICAL_MILE
+        NauticalMiles::from(StatuteMiles::new(stat_dist)).value
     }
 
     pub fn nautical_to_statute(naut_dist: f64) -> f64 {
-        naut_dist * NAUTICAL_MILE / STATUTE_MILE
+        StatuteMiles::from(NauticalMiles::new(naut_dist)).value
     }
 }
 
@@ -39,7 +67,7 @@ mod tests {
 
     #[test]
     fn mph_to_knots_test() {
-        assert_eq!(speed::mph_to_knots(100.0), 86.89740820734342);
+        assert_eq!(speed::mph_to_knots(100.0), 86.8974082073434);
     }
 
     #[test]
