@@ -50,6 +50,31 @@ pub mod speed {
     }
 }
 
+pub mod fuel {
+    pub trait Fuel {
+        fn weight(&self) -> f64;
+        fn volume(&self) -> f64;
+    }
+
+    pub struct AvGas100LL {
+        pub value: f64
+    }
+
+    impl Fuel for AvGas100LL {
+        fn weight(&self) -> f64 {
+            self.value *  6.01
+        }
+
+        fn volume(&self) -> f64 {
+            self.value
+        }
+    }
+
+    pub fn fuel_consumed(gal_per_hour: f64, minutes: f64) -> f64 {
+        minutes * gal_per_hour / 60.0
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -93,5 +118,13 @@ mod tests {
     #[test]
     fn nm_to_sm_disp() {
         assert_eq!(format!("{:.2}", distance::nautical_to_statute(1.0)), "1.15");
+    }
+
+    #[test]
+    fn weight_used() {
+        let minutes = 45.0;
+        let gal_per_hour = 12.0;
+        let avgas = fuel::AvGas100LL { value: fuel::fuel_consumed(gal_per_hour, minutes) };
+        assert_eq!(format!("{:.2}", fuel::Fuel::weight(&avgas)), "54.09");
     }
 }
