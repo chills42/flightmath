@@ -57,16 +57,36 @@ pub mod fuel {
     }
 
     pub struct AvGas100LL {
-        pub value: f64
+        pub gallons: f64
     }
 
     impl Fuel for AvGas100LL {
         fn weight(&self) -> f64 {
-            self.value *  6.01
+            self.gallons *  6.01
         }
 
         fn volume(&self) -> f64 {
-            self.value
+            self.gallons
+        }
+    }
+
+    pub struct JetA {
+        pub gallons: f64
+    }
+
+    impl JetA {
+        pub fn from_lbs(weight: f64) -> Self {
+            Self { gallons: weight / 6.55 }
+        }
+    }
+
+    impl Fuel for JetA {
+        fn weight(&self) -> f64 {
+            self.gallons * 6.55
+        }
+
+        fn volume(&self) -> f64 {
+            self.gallons
         }
     }
 
@@ -124,7 +144,14 @@ mod tests {
     fn weight_used() {
         let minutes = 45.0;
         let gal_per_hour = 12.0;
-        let avgas = fuel::AvGas100LL { value: fuel::fuel_consumed(gal_per_hour, minutes) };
+        let avgas = fuel::AvGas100LL { gallons: fuel::fuel_consumed(gal_per_hour, minutes) };
         assert_eq!(format!("{:.2}", fuel::Fuel::weight(&avgas)), "54.09");
+    }
+
+    #[test]
+    fn jet_a_usage() {
+        let jeta = fuel::JetA::from_lbs(830.0);
+        assert_eq!(format!("{:.2}", fuel::Fuel::volume(&jeta)), "126.72");
+
     }
 }
