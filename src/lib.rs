@@ -51,6 +51,7 @@ pub mod speed {
 }
 
 pub mod airspeed {
+    #[derive(Debug, PartialEq)]
     pub struct Airspeed {
         pub direction: i16,
         pub speed: f64
@@ -62,7 +63,7 @@ pub mod airspeed {
         }
 
         pub fn components(&self, direction: i16) -> WindComponents {
-            let mut x = (self.direction - direction);
+            let mut x = self.direction - direction;
             if x < -180 {
                 x += 180
             }
@@ -70,6 +71,27 @@ pub mod airspeed {
             let base = (self.speed * (x as f64).to_radians().cos() * 100.0).round() / 100.0;
             let cross = (self.speed * (y as f64).to_radians().cos() * 100.0).round() / 100.0;
             WindComponents::from_raw(base, cross)
+        }
+
+        pub fn plus(&self, x: Airspeed) -> Airspeed {
+            let v1 = self.speed;
+            let v2 = x.speed;
+            let diff = self.direction - x.direction;
+            let alpha = (180 - diff.abs()).abs();
+            let new_speed = (v1.powi(2) + v2.powi(2) - 2.0 * v1 * v2 * (alpha as f64).to_radians().cos()).sqrt();
+            let wca = (v2 * (alpha as f64).to_radians().sin() / new_speed).asin().to_degrees().copysign(diff as f64);
+            let new_dir = self.direction + wca as i16;
+
+            Airspeed::from_dir_and_speed(new_dir, (new_speed * 100.0).round() / 100.0)
+        }
+    }
+
+    impl Into<f64> for BaseComponent {
+        fn into(self) -> f64 {
+            match self {
+                Self::Headwind(x) => x,
+                Self::Tailwind(x) => x * -1.0
+            }
         }
     }
 
@@ -100,6 +122,7 @@ pub mod airspeed {
         Headwind(f64),
         Tailwind(f64)
     }
+
 
     #[derive(Debug, PartialEq)]
     pub enum CrossComponent {
@@ -244,5 +267,29 @@ mod tests {
         let expected = airspeed::WindComponents::from_raw(-18.79, -6.84);
         println!("wind from {} at {:02} using runway {} {:?}", 270, 20.0, 7, expected);
         assert_eq!(airspeed::Airspeed::from_dir_and_speed(270, 20.0).components(70), expected);
+    }
+
+    #[test]
+    fn air_plus3() {
+        let course = airspeed::Airspeed::from_dir_and_speed(90, 124.0);
+        let wind = airspeed::Airspeed::from_dir_and_speed(130, 15.0);
+        let expected = airspeed::Airspeed::from_dir_and_speed(86, 135.83);
+        assert_eq!(course.plus(wind), expected);
+    }
+
+    #[test]
+    fn air_plus2() {
+        let course = airspeed::Airspeed::from_dir_and_speed(60, 100.0);
+        let wind = airspeed::Airspeed::from_dir_and_speed(180, 40.0);
+        let expected = airspeed::Airspeed::from_dir_and_speed(40, 74.00);
+        assert_eq!(course.plus(wind), expected);
+    }
+
+    #[test]
+    fn air_plus() {
+        let course = airspeed::Airspeed::from_dir_and_speed(90, 124.0);
+        let wind = airspeed::Airspeed::from_dir_and_speed(50, 15.0);
+        let expected = airspeed::Airspeed::from_dir_and_speed(94, 135.83);
+        assert_eq!(course.plus(wind), expected);
     }
 }
