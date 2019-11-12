@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Craig Hills <craig.hills@pondurance.com>"]
 edition = "2018"
 license = "MIT"
+description = "Provides basic calculations commonly used for flight planning"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
